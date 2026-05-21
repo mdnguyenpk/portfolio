@@ -6,7 +6,7 @@ const cards = [
     label: 'Résumé',
     description: 'Full work history, skills, and education — downloadable PDF.',
     icon: '📄',
-    href: '/resume.pdf',
+    href: 'https://drive.google.com/file/d/1DQgE_tmyVBtuOw77ozOk5klQY6f7xTDf/view?usp=sharing',
     external: true,
     cta: 'Download PDF',
     accent: false,
