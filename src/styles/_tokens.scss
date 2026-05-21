@@ -1,0 +1,17 @@
+:root {
+  --color-bg: #080d14;
+  --color-surface: #0e1520;
+  --color-border: #1e2a3a;
+  --color-text: #e8f0f8;
+  --color-muted: #7a92aa;
+  --color-accent: #7ec8e3;
+  --font-display: 'Roboto', sans-serif;
+  --font-body: 'Inter', 'Helvetica Neue', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --space-xs: 0.25rem; --space-sm: 0.5rem; --space-md: 1rem;
+  --space-lg: 2rem; --space-xl: 4rem; --space-2xl: 8rem;
+}
+[data-theme='light'] {
+  --color-bg: #eef3f8; --color-surface: #fff; --color-border: #ccd8e4;
+  --color-text: #0e1a26; --color-muted: #4a6070; --color-accent: #1a7fa0;
+}

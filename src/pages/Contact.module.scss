@@ -1,0 +1,21 @@
+.contact {
+  padding: 8rem 2.5rem 6rem;
+  max-width: 600px;
+  margin: 0 auto;
+
+  h1 { font-family: var(--font-display); margin-bottom: 1rem; font-size: clamp(2rem, 5vw, 3.5rem); }
+  p { color: var(--color-muted); margin-bottom: 2rem; }
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  a {
+    font-size: 1rem;
+    color: var(--color-accent);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
