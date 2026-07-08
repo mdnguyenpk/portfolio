@@ -454,6 +454,8 @@ const tip = document.getElementById('tip');
 const tipT = document.getElementById('tipT');
 const tipD = document.getElementById('tipD');
 
+let stickyEl = null;
+
 MARKERS.forEach(m => {
   const el = document.createElement('div');
   el.className = 'marker';
@@ -481,13 +483,15 @@ MARKERS.forEach(m => {
     tip.style.top = top + 'px';
   }
 
-  el.addEventListener('mouseenter', show);
-  el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  el.addEventListener('mouseenter', () => { if (!stickyEl) show(); });
+  el.addEventListener('mouseleave', () => { if (!stickyEl) tip.style.display = 'none'; });
   el.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (tip.style.display === 'block' && tipT.textContent === el.dataset.t) {
+    if (stickyEl === el) {
+      stickyEl = null;
       tip.style.display = 'none';
     } else {
+      stickyEl = el;
       show();
     }
   });
@@ -495,7 +499,10 @@ MARKERS.forEach(m => {
   wrap.appendChild(el);
 });
 
-document.body.addEventListener('click', () => { tip.style.display = 'none'; });
+document.body.addEventListener('click', () => {
+  stickyEl = null;
+  tip.style.display = 'none';
+});
 </script>
 
 </body>
