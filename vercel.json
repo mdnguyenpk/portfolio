@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/bond-pinball-map", "destination": "/bond-pinball-map/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

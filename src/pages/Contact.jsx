@@ -8,8 +8,8 @@ export default function Contact() {
       <p>I&apos;m open to new opportunities. Feel free to reach out.</p>
       <div className={styles.links}>
         <a href={`mailto:${meta.email}`}>{meta.email}</a>
-        <a href="https://linkedin.com/" target="_blank" rel="noreferrer">LinkedIn</a>
-        <a href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://www.linkedin.com/in/minh-nguyen-a9565518/" target="_blank" rel="noreferrer">LinkedIn</a>
+        <a href="https://github.com/mdnguyenpk/" target="_blank" rel="noreferrer">GitHub</a>
       </div>
     </main>
   )

@@ -8,5 +8,5 @@ export const meta = {
     degree: 'B.S. Computer Science: Computer Game Design',
     school: 'University of California, Santa Cruz',
   },
-  summary: 'Frontend-focused Senior Software Engineer with 10+ years of experience building scalable apps and GUI tools for Apple, RealPage, and OnLive.',
+  summary: 'Front End/Full Stack Senior Software Engineer with 10+ years of experience building scalable apps and GUI tools for both startups and large companies.',
 }

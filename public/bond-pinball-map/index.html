@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>James Bond 007 Premium — Interactive Shot Map</title>
+<style>
+  :root{
+    --bg-page:#f4f2ec;
+    --surface-3:#ffffff;
+    --border-strong:#888780;
+    --text-primary:#2c2c2a;
+    --text-secondary:#5f5e5a;
+    --accent:#185fa5;
+    --on-accent:#ffffff;
+    --shadow-popover:0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg-page:#1c1c1a;
+      --surface-3:#3a3a37;
+      --border-strong:#5f5e5a;
+      --text-primary:#efeee8;
+      --text-secondary:#b4b2a9;
+      --accent:#85b7eb;
+      --on-accent:#042c53;
+      --shadow-popover:0 8px 24px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    padding:clamp(24px,4vw,64px) clamp(16px,3vw,40px);
+    background:var(--bg-page);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text-primary);
+    font-size:clamp(15px,0.95vw,19px);
+  }
+  h1{
+    max-width:min(900px,92vw);
+    margin:0 auto clamp(20px,2.4vw,36px);
+    font-size:clamp(20px,2.4vw,36px);
+    font-weight:600;
+    text-align:center;
+  }
+
+  /*
+    HOW TO USE
+    1. Save your playfield photo next to this HTML file (or anywhere on your site).
+    2. Set the src below to that file's path/URL.
+    3. The image is shown at its natural aspect ratio. All markers are positioned
+       with left/top percentages, so they scale with the image automatically —
+       you don't need to resize or crop to any particular dimensions.
+    4. The percentages below were calibrated to my illustrated sketch, not your
+       photo, so treat them as a starting layout: open this file, and drag/nudge
+       the numbers in the MARKERS array at the bottom of this file until each
+       dot sits on the correct shot in your image. Two numbers per marker
+       (left / top), both 0-100.
+  */
+  .pf-wrap{
+    position:relative;
+    max-width:min(794px,90vw);
+    margin:0 auto;
+    aspect-ratio:16/25.8;
+    border-radius:8px;
+    overflow:hidden;
+    background:var(--surface-3);
+  }
+  .pf-wrap img{
+    position:absolute;
+    inset:0;
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .marker{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    width:clamp(22px,2.6vw,34px);
+    height:clamp(22px,2.6vw,34px);
+    border-radius:50%;
+    background:var(--surface-3);
+    border:2px solid var(--accent);
+    color:var(--on-accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:clamp(11px,1.1vw,15px);
+    font-weight:600;
+    cursor:pointer;
+    transition:width .15s, height .15s;
+  }
+  .marker span{color:var(--accent)}
+  .marker:hover{width:clamp(26px,3vw,40px);height:clamp(26px,3vw,40px)}
+  .tip{
+    position:absolute;
+    display:none;
+    max-width:clamp(210px,20vw,320px);
+    background:var(--surface-3);
+    border:0.5px solid var(--border-strong);
+    border-radius:8px;
+    padding:clamp(10px,1vw,16px) clamp(12px,1.2vw,18px);
+    font-size:clamp(12px,1.05vw,16px);
+    line-height:1.5;
+    color:var(--text-primary);
+    box-shadow:var(--shadow-popover);
+    z-index:10;
+    pointer-events:none;
+  }
+  .tip .tt{font-weight:600;margin:0 0 4px;color:var(--accent)}
+  .legend{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    margin-top:14px;
+    font-size:clamp(12px,0.9vw,15px);
+    color:var(--text-secondary);
+    flex-wrap:wrap;
+    max-width:min(760px,90vw);
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .placeholder{
+    position:absolute;
+    inset:0;
+    background:repeating-linear-gradient(45deg, var(--surface-3), var(--surface-3) 10px, var(--bg-page) 10px, var(--bg-page) 20px);
+    border:1px dashed var(--border-strong);
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:24px;
+    font-size:clamp(13px,1vw,17px);
+    color:var(--text-secondary);
+  }
+  .sec{max-width:min(1400px,94vw);margin:clamp(32px,4vw,64px) auto 0}
+  .sec-label{font-size:clamp(14px,1.15vw,20px);font-weight:600;color:var(--text-secondary);margin:0 0 clamp(12px,1.4vw,22px);text-align:center}
+  .film-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.2vw,20px)}
+  .film-card{border-radius:12px;padding:clamp(14px,1.4vw,24px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-left-width:6px;border-left-style:solid}
+  .film-name{font-size:clamp(14px,1.3vw,20px);font-weight:600;margin:0 0 clamp(8px,0.8vw,14px)}
+  .film-name span{font-weight:600}
+  .film-card ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:clamp(5px,0.5vw,8px)}
+  .film-card li{font-size:clamp(12px,1vw,16px);line-height:1.5;color:var(--text-secondary)}
+  .film-card li b{font-weight:600;color:var(--text-primary)}
+  .prio{display:flex;flex-direction:column;gap:clamp(8px,0.8vw,14px)}
+  .prio-row{display:flex;gap:clamp(12px,1.1vw,18px);align-items:flex-start;padding:clamp(10px,1vw,16px) clamp(12px,1.2vw,18px);border-radius:8px;background:var(--surface-3);border:0.5px solid var(--border-strong)}
+  .prio-num{font-size:clamp(13px,1.15vw,18px);font-weight:600;color:var(--accent);min-width:22px}
+  .prio-t{font-size:clamp(13px,1.15vw,18px);font-weight:600;margin:0 0 2px}
+  .prio-d{font-size:clamp(12px,1vw,16px);color:var(--text-secondary);margin:0}
+  .spec-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(10px,1vw,18px)}
+  .spec-card{border-radius:8px;padding:clamp(12px,1.2vw,20px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-left-width:6px;border-left-style:solid}
+  .spec-t{font-size:clamp(13px,1.15vw,18px);font-weight:600;margin:0 0 2px}
+  .spec-film{font-size:clamp(11px,0.9vw,14px);font-weight:600;margin:0 0 6px}
+  .spec-d{font-size:clamp(12px,1vw,16px);color:var(--text-secondary);margin:0}
+  .bjb-card{border-radius:12px;padding:clamp(16px,1.6vw,26px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-left-width:6px;border-left-style:solid;border-left-color:#1AABA0}
+  .bjb-title{font-size:clamp(14px,1.3vw,20px);font-weight:600;margin:0 0 clamp(10px,1vw,16px);color:#1AABA0}
+  .bjb-row{display:flex;gap:clamp(10px,1vw,16px);margin:0 0 clamp(8px,0.8vw,14px)}
+  .bjb-label{font-size:clamp(11px,0.9vw,14px);font-weight:600;color:var(--text-muted);min-width:76px}
+  .bjb-text{font-size:clamp(12px,1vw,16px);color:var(--text-secondary);margin:0}
+  .bw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.2vw,20px)}
+  .bw-card{border-radius:8px;padding:clamp(14px,1.4vw,24px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-left-width:6px;border-left-style:solid}
+  .bw-name{font-size:clamp(14px,1.3vw,20px);font-weight:600;margin:0 0 4px}
+  .bw-film{font-size:clamp(11px,0.9vw,14px);font-weight:600;margin:0 0 8px}
+  .bw-req{font-size:clamp(12px,1vw,16px);color:var(--text-secondary);margin:0}
+  .bw-note{font-size:clamp(12px,1vw,16px);color:var(--text-secondary);margin:14px 0 0;padding:clamp(12px,1.2vw,18px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-radius:8px}
+  @media (max-width:640px){.film-grid,.spec-grid,.bw-grid{grid-template-columns:1fr}}
+  .mb-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.2vw,20px)}
+  .mb-card{border-radius:12px;padding:clamp(16px,1.6vw,26px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-left-width:6px;border-left-style:solid}
+  .mb-title{font-size:clamp(14px,1.3vw,20px);font-weight:600;margin:0 0 clamp(10px,1vw,16px)}
+  .mb-row{margin:0 0 clamp(8px,0.8vw,14px)}
+  .mb-label{font-size:clamp(11px,0.9vw,14px);font-weight:600;color:var(--text-muted);display:block;margin:0 0 2px}
+  .mb-text{font-size:clamp(12px,1vw,16px);color:var(--text-secondary);margin:0;line-height:1.5}
+  @media (max-width:640px){.mb-grid{grid-template-columns:1fr}}
+  .sk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.2vw,20px)}
+  .sk-card{border-radius:12px;padding:clamp(14px,1.4vw,24px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-left-width:6px;border-left-style:solid;border-left-color:#7B48C8}
+  .sk-name{font-size:clamp(14px,1.3vw,20px);font-weight:600;margin:0 0 clamp(8px,0.8vw,14px);color:#7B48C8}
+  .sk-card ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:clamp(5px,0.5vw,8px)}
+  .sk-card li{font-size:clamp(12px,1vw,16px);line-height:1.5;color:var(--text-secondary)}
+  .sk-card li b{font-weight:600;color:var(--text-primary)}
+  .sk-super{margin-top:clamp(12px,1.2vw,20px);border-radius:12px;padding:clamp(14px,1.4vw,24px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-left-width:6px;border-left-style:solid;border-left-color:#7B48C8}
+  @media (max-width:900px){.sk-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:640px){.sk-grid{grid-template-columns:1fr}}
+  .ab-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.2vw,20px)}
+  .ab-card{border-radius:12px;padding:clamp(14px,1.4vw,24px);background:var(--surface-3);border:0.5px solid var(--border-strong);border-left-width:6px;border-left-style:solid}
+  .ab-name{font-size:clamp(14px,1.3vw,20px);font-weight:600;margin:0 0 clamp(8px,0.8vw,14px)}
+  .ab-card ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:clamp(5px,0.5vw,8px)}
+  .ab-card li{font-size:clamp(12px,1vw,16px);line-height:1.5;color:var(--text-secondary)}
+  .ab-card li b{font-weight:600;color:var(--text-primary)}
+  @media (max-width:900px){.ab-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:640px){.ab-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<h1>James Bond 007 Premium — Interactive Shot Map</h1>
+<p style="text-align:center;margin:0 auto clamp(12px,1.6vw,24px);font-size:clamp(13px,1vw,16px);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;gap:6px">By
+<a href="https://instagram.com/icyminhtos" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:5px">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+icyminhtos</a></p>
+
+<div class="pf-wrap" id="pfWrap">
+  <!-- Replace "playfield.jpg" with the path/URL to your own photo. -->
+  <img id="pfImage" src="playfield.jpg" alt="James Bond 007 Premium pinball playfield"
+       onerror="this.style.display='none'; document.getElementById('pfPlaceholder').style.display='flex';">
+  <div class="placeholder" id="pfPlaceholder" style="display:none;">
+    Add your playfield photo:<br>replace the src on the &lt;img id="pfImage"&gt; tag<br>with your own file path or URL.
+  </div>
+  <div class="tip" id="tip"><p class="tt" id="tipT"></p><p id="tipD" style="margin:0;color:var(--text-secondary)"></p></div>
+</div>
+
+<div class="sec">
+<p class="sec-label">The two headline multiballs</p>
+<div class="mb-grid">
+<div class="mb-card" style="border-left-color:#2F8F3B">
+<p class="mb-title" style="color:#2F8F3B">Bird 1 Multiball (3-ball)</p>
+<div class="mb-row"><span class="mb-label">Qualify</span><p class="mb-text">Knock down the 3 drop targets in front of the rocket to light the center loop lock, then shoot the center loop 3 times to lock all 3 balls and start it.</p></div>
+<div class="mb-row"><span class="mb-label">Rules</span><p class="mb-text">Score lit jackpots at the rocket. Make 3 jackpot shots from the upper flipper before time runs out to extend the multiball, and keep scoring jackpots to light the super jackpot at the rocket. Completing the 7 SPECTRE standups before starting raises every jackpot value.</p></div>
+</div>
+<div class="mb-card" style="border-left-color:#D9772E">
+<p class="mb-title" style="color:#D9772E">Jetpack Multiball (2-ball)</p>
+<div class="mb-row"><span class="mb-label">Qualify</span><p class="mb-text">Shoot the left eject (the hidden scoop under the upper flipper) to light the left ramp, then shoot the left ramp to start it.</p></div>
+<div class="mb-row"><span class="mb-label">Rules</span><p class="mb-text">Shoot the center loop right away to lock in a 3M starting jackpot, then hit lit jackpots. After 5, the left ramp lights a double jackpot, then a super jackpot plus add-a-ball at a shot moving right to left. On Premium/LE, that left ramp shot sends the jetpack over to the Dragon Tank automatically &mdash; shoot the tank target once it arrives to drop the locked ball for the super jackpot.</p></div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<p class="sec-label">Modes by film — start Villain at the right ramp, Henchmen at the side ramp, then chase the SPECTRE weapon and Q Branch for each</p>
+<div class="film-grid">
+<div class="film-card" style="border-left-color:#D4AC0D"><p class="film-name">Dr. No <span style="color:#D4AC0D">(yellow)</span></p><ul>
+<li><b>Villain</b> — Trouble in Jamaica</li>
+<li><b>Henchmen</b> — Sinister Summit (Dent)</li>
+<li><b>SPECTRE</b> — Troublesome Tarantulas</li>
+<li><b>Q Branch</b> — Radioactive Reconnaissance <span style="color:var(--text-secondary)">(bumper hits)</span></li>
+</ul></div>
+<div class="film-card" style="border-left-color:#E24B4A"><p class="film-name">From Russia With Love <span style="color:#E24B4A">(red)</span></p><ul>
+<li><b>Villain</b> — SPECTRE Island (Klebb)</li>
+<li><b>Henchmen</b> — Orient Express (Grant)</li>
+<li><b>SPECTRE</b> — Deadly Dagger</li>
+<li><b>Q Branch</b> — Attache Case &rarr; Helicopter MB <span style="color:var(--text-secondary)">(6 right orbit shots)</span></li>
+</ul></div>
+<div class="film-card" style="border-left-color:#A8791C"><p class="film-name">Goldfinger <span style="color:#A8791C">(gold)</span></p><ul>
+<li><b>Villain</b> — The Incredible Laser Ray</li>
+<li><b>Henchmen</b> — He Blew a Fuse (Oddjob)</li>
+<li><b>SPECTRE</b> — Death By Derby</li>
+<li><b>Q Branch</b> — DB5 &rarr; DB5 Multiball <span style="color:var(--text-secondary)">(3 DB5 eject shots)</span></li>
+</ul></div>
+<div class="film-card" style="border-left-color:#D85A30"><p class="film-name">Thunderball <span style="color:#D85A30">(orange)</span></p><ul>
+<li><b>Villain</b> — Disco Volante Demolition</li>
+<li><b>Henchmen</b> — Femme Fatale (Volpe)</li>
+<li><b>SPECTRE</b> — Swimming With Sharks</li>
+<li><b>Q Branch</b> — Power Pack Multiball <span style="color:var(--text-secondary)">(3 left eject shots)</span></li>
+</ul></div>
+<div class="film-card" style="border-left-color:#4C7A1F"><p class="film-name">You Only Live Twice <span style="color:#4C7A1F">(green)</span></p><ul>
+<li><b>Villain</b> — Feeding Frenzy (Blofeld)</li>
+<li><b>Henchmen</b> — Usual Reception (Osato)</li>
+<li><b>SPECTRE</b> — Outer Space Hijack</li>
+<li><b>Q Branch</b> — Little Nellie Multiball <span style="color:var(--text-secondary)">(20 rocket shots; strong hits count double)</span></li>
+</ul></div>
+<div class="film-card" style="border-left-color:#2E6DA4"><p class="film-name">Diamonds Are Forever <span style="color:#2E6DA4">(blue)</span></p><ul>
+<li><b>Villain</b> — Diamonds of Destruction</li>
+<li><b>Henchmen</b> — Mr. Wint and Mr. Kidd</li>
+<li><b>SPECTRE</b> — Bath-O-Sub Bash</li>
+<li><b>Q Branch</b> — Q's Ring <span style="color:var(--text-secondary)">(400 spinner spins)</span></li>
+</ul></div>
+</div>
+</div>
+
+<div class="sec">
+<p class="sec-label">SPECTRE weapon awards &mdash; complete the 7 standups, then hit the Goldfinger target. Mode cycles every second.</p>
+<div class="spec-grid">
+<div class="spec-card" style="border-left-color:#D4AC0D"><p class="spec-t">Troublesome Tarantulas</p><p class="spec-film" style="color:#D4AC0D">Dr. No &middot; right ramp + side ramp</p><p class="spec-d">Extends all mode timers +17s and 007 Scoring +7s.</p></div>
+<div class="spec-card" style="border-left-color:#E24B4A"><p class="spec-t">Deadly Dagger</p><p class="spec-film" style="color:#E24B4A">From Russia With Love &middot; right orbit + side ramp</p><p class="spec-d">Extends all ball save timers +7s.</p></div>
+<div class="spec-card" style="border-left-color:#A8791C"><p class="spec-t">Death By Derby</p><p class="spec-film" style="color:#A8791C">Goldfinger &middot; side ramp + DB5 eject</p><p class="spec-d">Upgrades High Stakes mystery award with 5 exclusive awards.</p></div>
+<div class="spec-card" style="border-left-color:#D85A30"><p class="spec-t">Swimming With Sharks</p><p class="spec-film" style="color:#D85A30">Thunderball &middot; left ramp, rocket, right orbit, right ramp</p><p class="spec-d">Awards 2 smart missiles instead of 1, plus 2 at the start of every ball.</p></div>
+<div class="spec-card" style="border-left-color:#4C7A1F"><p class="spec-t">Outer Space Hijack</p><p class="spec-film" style="color:#4C7A1F">You Only Live Twice &middot; rocket lane x6</p><p class="spec-d">Qualifies an add-a-ball at the action button during any multiball.</p></div>
+<div class="spec-card" style="border-left-color:#2E6DA4"><p class="spec-t">Bath-O-Sub Bash</p><p class="spec-film" style="color:#2E6DA4">Diamonds Are Forever &middot; left ramp, rocket, right orbit, right ramp</p><p class="spec-d">Super pops, spinner, and rocket modes now last the entire ball.</p></div>
+</div>
+</div>
+
+<div class="sec">
+<p class="sec-label">Bond Women multiplier - Flashing = Ready to Collect; Solid = Collected and Ready at Action Button</p>
+<div class="bw-grid">
+<div class="bw-card" style="border-left-color:#D4AC0D"><p class="bw-name">Honey Ryder</p><p class="bw-film" style="color:#D4AC0D">Dr. No</p><p class="bw-req">25 pop bumper hits</p></div>
+<div class="bw-card" style="border-left-color:#E24B4A"><p class="bw-name">Tatiana Romanova</p><p class="bw-film" style="color:#E24B4A">From Russia With Love</p><p class="bw-req">3 right orbit shots</p></div>
+<div class="bw-card" style="border-left-color:#A8791C"><p class="bw-name">Pussy Galore</p><p class="bw-film" style="color:#A8791C">Goldfinger</p><p class="bw-req">4 DB5 ejects</p></div>
+<div class="bw-card" style="border-left-color:#D85A30"><p class="bw-name">Domino Derval</p><p class="bw-film" style="color:#D85A30">Thunderball</p><p class="bw-req">4 left ejects</p></div>
+<div class="bw-card" style="border-left-color:#4C7A1F"><p class="bw-name">Kissy Suzuki</p><p class="bw-film" style="color:#4C7A1F">You Only Live Twice</p><p class="bw-req">10 rocket hits (hard hits count double)</p></div>
+<div class="bw-card" style="border-left-color:#2E6DA4"><p class="bw-name">Tiffany Case</p><p class="bw-film" style="color:#2E6DA4">Diamonds Are Forever</p><p class="bw-req">200 spinner spins</p></div>
+</div>
+<p class="bw-note">Once qualified, shoot the flashing upper loop to collect her &mdash; the insert closest to the upper flipper collects first. Each collected woman adds +1x to 007 Scoring (max 7x) and +10s to its timer (20s at 2x up to 70s at 7x, plus a 30s ball save at 7x). Press the action button to cash in all collected women at once. Progress resets on drain unless you've completed all four modes for that film, which locks her in until you cash out.</p>
+</div>
+
+<div class="sec">
+<p class="sec-label">Skill shots — 8 named shots available every ball; hold left flipper + full plunge to access the timed shots</p>
+<div class="sk-grid">
+<div class="sk-card">
+<p class="sk-name">Undercover</p>
+<ul>
+<li><b>How</b> — Hold left flipper, full plunge, shoot the right ramp within 5 switch hits.</li>
+<li><b>Awards</b> — 2.5M + 500k per attempt, plus one Smart Missile (once per game).</li>
+</ul>
+</div>
+<div class="sk-card">
+<p class="sk-name">Double "O"</p>
+<ul>
+<li><b>How</b> — Hold left flipper, full plunge, shoot the side ramp within 5 switch hits.</li>
+<li><b>Awards</b> — 2.5M + 500k per attempt, plus one Smart Missile (once per game).</li>
+</ul>
+</div>
+<div class="sk-card">
+<p class="sk-name">Eyes Only</p>
+<ul>
+<li><b>How</b> — Hold left flipper, full plunge, shoot the DB5 eject within 5 switch hits.</li>
+<li><b>Awards</b> — 2.5M + 500k per attempt, plus one Smart Missile (once per game).</li>
+</ul>
+</div>
+<div class="sk-card">
+<p class="sk-name">Top Secret</p>
+<ul>
+<li><b>How</b> — Hold left flipper, full plunge, shoot the bumper lane from the upper flipper.</li>
+<li><b>Awards</b> — 2.5M + 500k per attempt, plus one Smart Missile (once per game).</li>
+</ul>
+</div>
+<div class="sk-card">
+<p class="sk-name">Licensed To Kill</p>
+<ul>
+<li><b>How</b> — Shoot the left eject directly off the initial plunge.</li>
+<li><b>Awards</b> — 2.5M + 500k per attempt, plus one Smart Missile (once per game).</li>
+</ul>
+</div>
+<div class="sk-card">
+<p class="sk-name">Commander Bond</p>
+<ul>
+<li><b>How</b> — Medium-strength plunge, then shoot the left ramp.</li>
+<li><b>Awards</b> — 1.25M + 250k per attempt. No Smart Missile.</li>
+</ul>
+</div>
+<div class="sk-card">
+<p class="sk-name">Classified</p>
+<ul>
+<li><b>How</b> — Direct plunge to the flashing MI6 lane without using flippers to adjust trajectory.</li>
+<li><b>Awards</b> — 500k + 200k per attempt, plus +1x bonus multiplier.</li>
+</ul>
+</div>
+<div class="sk-card">
+<p class="sk-name">MI6</p>
+<ul>
+<li><b>How</b> — Plunge toward the flashing MI6 lane; flippers may be used to redirect.</li>
+<li><b>Awards</b> — 300k + 100k per attempt, plus +1x bonus multiplier.</li>
+</ul>
+</div>
+</div>
+<div class="sk-super">
+<p class="sk-name" style="margin-bottom:clamp(6px,0.6vw,10px)">Super Skill Shot</p>
+<p style="font-size:clamp(12px,1vw,16px);color:var(--text-secondary);margin:0">Full plunge, then chain <b style="color:var(--text-primary)">right orbit &rarr; upper loop &rarr; side ramp</b> in sequence within 5 switch hits. Awards <b style="color:var(--text-primary)">2 Smart Missiles</b> at once.</p>
+</div>
+<div class="sk-super" style="margin-top:clamp(8px,0.8vw,14px)">
+<p class="sk-name" style="margin-bottom:clamp(6px,0.6vw,10px)">Martini Shot</p>
+<p style="font-size:clamp(12px,1vw,16px);color:var(--text-secondary);margin:0">Shoot the side ramp and let the ball <b style="color:var(--text-primary)">roll back down the right ramp</b> without completing the shot. Awards <b style="color:var(--text-primary)">1 Smart Missile</b> plus <b style="color:var(--text-primary)">1M cumulative</b> — the value grows by 1M for each Martini Shot collected across the game.</p>
+</div>
+</div>
+
+<div class="sec">
+<p class="sec-label">Action button — press to spend one of up to 4 stacked functions, each lit a different color</p>
+<div class="ab-grid">
+<div class="ab-card" style="border-left-color:#2E6DA4">
+<p class="ab-name" style="color:#2E6DA4">Smart Missile <span style="font-weight:400;font-size:clamp(11px,0.9vw,14px)">(blue)</span></p>
+<ul>
+<li><b>Activate</b> — Press (don't hold) when the button flashes blue.</li>
+<li><b>Effect</b> — Collects any lit shot automatically, prioritizing the hardest available shot.</li>
+<li><b>Limits</b> — Max 4 stacked. Disabled while a super jackpot is lit.</li>
+<li><b>Sources</b> — 1 free at game start; earned from super skill shots, mode completions, Martini Shot, and Swimming With Sharks weapon (grants 2 per ball).</li>
+<li><b>Tip</b> — If 007 Scoring is active, press either flipper to switch the button to missile mode without cashing out the multiplier.</li>
+</ul>
+</div>
+<div class="ab-card" style="border-left-color:#D95A8A">
+<p class="ab-name" style="color:#D95A8A">007 Scoring <span style="font-weight:400;font-size:clamp(11px,0.9vw,14px)">(pink)</span></p>
+<ul>
+<li><b>Activate</b> — Press when the button is pink after collecting one or more Bond Women.</li>
+<li><b>Effect</b> — Activates all collected women at once as a playfield multiplier (+1x per woman, up to +7x).</li>
+<li><b>Timer</b> — 10s base +10s per woman (20s at 2x up to 70s at 7x). Reaching 7x also grants a 30s ball save.</li>
+<li><b>Tip</b> — Time it to land during a jackpot barrage — entering Bird 1 Multiball at 7x is the highest-value play on the machine.</li>
+</ul>
+</div>
+<div class="ab-card" style="border-left-color:#D4AC0D">
+<p class="ab-name" style="color:#D4AC0D">Add a Ball <span style="font-weight:400;font-size:clamp(11px,0.9vw,14px)">(yellow)</span></p>
+<ul>
+<li><b>Activate</b> — Hold the action button during multiball when lit yellow.</li>
+<li><b>Effect</b> — Adds an extra ball into play during any multiball.</li>
+<li><b>Source</b> — Awarded by completing the Outer Space Hijack SPECTRE weapon (You Only Live Twice).</li>
+<li><b>Limits</b> — Mutually exclusive with Swipe a Ball on Premium/LE — you can only use one per multiball.</li>
+</ul>
+</div>
+<div class="ab-card" style="border-left-color:#2F8F3B">
+<p class="ab-name" style="color:#2F8F3B">Swipe a Ball <span style="font-weight:400;font-size:clamp(11px,0.9vw,14px)">(green &mdash; Premium/LE only)</span></p>
+<ul>
+<li><b>Activate</b> — Press when lit green during Bird 1 Multiball.</li>
+<li><b>Effect</b> — Retrieves a physically locked ball from the habitrail and puts it back into play.</li>
+<li><b>Limits</b> — Once per multiball only. Each subsequent Bird 1 start requires more drop target completions before this becomes available again.</li>
+<li><b>Note</b> — Mutually exclusive with Add a Ball on the same multiball.</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<p class="sec-label">"Bond&hellip; James Bond" multiball &mdash; the low-level wizard mode</p>
+<div class="bjb-card">
+<p class="bjb-title">Bond&hellip; James Bond multiball</p>
+<div class="bjb-row"><span class="bjb-label">Qualify</span><p class="bjb-text">Play at least one villain mode, one henchmen mode, and start both Bird 1 and Jetpack Multiball. Once all four are done, the right ramp and left eject light to start it.</p></div>
+<div class="bjb-row"><span class="bjb-label">Format</span><p class="bjb-text">2-ball multiball lasting just over a minute. Make every shot on the playfield twice to progress &mdash; upper loop shots score double and count toward two shots at once.</p></div>
+<div class="bjb-row"><span class="bjb-label">Payoff</span><p class="bjb-text">Once every shot has been made twice, the side ramp lights for the super jackpot &mdash; up to 100M unmultiplied, and gone the instant time runs out.</p></div>
+<div class="bjb-row"><span class="bjb-label">Tip</span><p class="bjb-text">Carry a 7x 007 Scoring multiplier into this mode and scores over a billion are possible &mdash; a great early goal for beginners or a safe way to lock in a strong tournament score.</p></div>
+</div>
+</div>
+
+<div class="sec">
+<p class="sec-label">Scoring priority guide</p>
+<div class="prio">
+<div class="prio-row"><span class="prio-num">1</span><div><p class="prio-t">Start a villain and a henchmen mode early</p><p class="prio-d">Right ramp and side ramp — this plus both multiballs qualifies "Bond&hellip; James Bond" multiball, an easy 100M-cap payday.</p></div></div>
+<div class="prio-row"><span class="prio-num">2</span><div><p class="prio-t">Stack a mode into Bird 1 or Jetpack Multiball</p><p class="prio-d">Jackpots run 3M+ each and Bird 1's super jackpot caps at 300M &mdash; always more valuable inside multiball than solo.</p></div></div>
+<div class="prio-row"><span class="prio-num">3</span><div><p class="prio-t">Bank Bond Women, then cash 007 Scoring mid-multiball</p><p class="prio-d">Up to 7x playfield for up to 70 seconds &mdash; time it to land on a jackpot barrage, not an empty shot.</p></div></div>
+<div class="prio-row"><span class="prio-num">4</span><div><p class="prio-t">Hit SPECTRE targets before starting Bird 1</p><p class="prio-d">Each target adds 25k to every jackpot for that multiball &mdash; worth clearing first if you can.</p></div></div>
+<div class="prio-row"><span class="prio-num">5</span><div><p class="prio-t">Bank smart missiles for hard shots</p><p class="prio-d">Super skill shots and mode completions build a stock of up to 4 &mdash; spend on the shot you'd otherwise miss.</p></div></div>
+<div class="prio-row"><span class="prio-num">6</span><div><p class="prio-t">Chase all four modes per film for bonus</p><p class="prio-d">Completing villain, henchmen, SPECTRE weapon, and Q Branch for one film adds 25M to end-of-ball bonus.</p></div></div>
+<div class="prio-row"><span class="prio-num">7</span><div><p class="prio-t">Push toward a villain mini-wizard, then the final wizard mode</p><p class="prio-d">Starting all six of any mode type unlocks a mini-wizard; clearing all four unlocks On Her Majesty's Secret Service.</p></div></div>
+</div>
+</div>
+
+<script>
+// left/top are percentages (0-100) of the image's rendered width/height.
+// Adjust these to align each numbered dot with the real shot in your photo.
+const MARKERS = [
+  { n: 1,  left: 17.3, top: 45.6, t: "Left eject", d: "Lighting this lights the left ramp for a Jetpack Multiball lock. Collect EB and Mystery" },
+  { n: 2,  left: 26.3, top: 23.6, t: "Left ramp", d: "Once lit by the left eject, shoot here to collect a lock for Jetpack Multiball." },
+  { n: 3,  left: 40.4, top: 18.0, t: "SPECTRE standups", d: "Seven standup targets. Light SPECTRE weapons and boost Bird 1 Multiball jackpot values." },
+  { n: 6,  left: 49.8, top: 37.3, t: "Side ramp", d: "Entered from the upper flipper. Starts Henchmen modes." },
+  { n: 4,  left: 40.1, top: 29.4, t: "Drop targets", d: "Three targets in front of the Bird 1 rocket. Knock them down to light locks for Bird 1 Multiball." },
+  { n: 5,  left: 46.8, top: 22.8, t: "Center loop", d: "Locks balls for Bird 1 Multiball. Locks in the jackpot value once Jetpack multiball starts." },
+  { n: 7,  left: 52.5, top: 29.4, t: "Dragon Tank target", d: "Activates Outlane ball save (5+1 per additional time, stackable) " },
+  { n: 8,  left: 59.0, top: 22.8, t: "Pop Bumpers/M16 Lands", d: "Bumpers change movies. M16 Lanes increase bonus multiplier (5x MAX)" },
+  { n: 9,  left: 57.8, top: 37.3, t: "Goldfinger target", d: "Starts a SPECTRE weapon mode when flashing. Also changes movie." },
+  { n: 10, left: 67.8, top: 43.7, t: "Right ramp", d: "Starts a Villain mode." },
+  { n: 11, left: 69.8, top: 51.7, t: "DB5 eject", d: "Starts Q Modes." },
+  { n: 12, left: 50.6, top: 33.3, t: "Upper loop", d: "Collects a Bond Woman — press the action button to activate a timed playfield multiplier, up to 7x." },
+  { n: 13, left: 69.6, top: 63.3, t: "Inlanes", d: "Collect twice to light High Stakes (Mystery)." }
+];
+
+const wrap = document.getElementById('pfWrap');
+const tip = document.getElementById('tip');
+const tipT = document.getElementById('tipT');
+const tipD = document.getElementById('tipD');
+
+MARKERS.forEach(m => {
+  const el = document.createElement('div');
+  el.className = 'marker';
+  el.style.left = m.left + '%';
+  el.style.top = m.top + '%';
+  el.innerHTML = '<span>' + m.n + '</span>';
+  el.dataset.t = m.t;
+  el.dataset.d = m.d;
+
+  function show(){
+    tipT.textContent = el.dataset.t;
+    tipD.textContent = el.dataset.d;
+    tip.style.display = 'block';
+    const wr = wrap.getBoundingClientRect();
+    const markerLeftPx = wr.width * (m.left / 100);
+    const markerTopPx = wr.height * (m.top / 100);
+    const gap = 14;
+    const tipW = tip.offsetWidth;
+    const tipH = tip.offsetHeight;
+    let left = m.left < 50 ? (markerLeftPx - tipW - gap) : (markerLeftPx + gap);
+    let top = m.top < 50 ? (markerTopPx - tipH - gap) : (markerTopPx + gap);
+    left = Math.max(4, Math.min(left, wr.width - tipW - 4));
+    top = Math.max(4, Math.min(top, wr.height - tipH - 4));
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+
+  el.addEventListener('mouseenter', show);
+  el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (tip.style.display === 'block' && tipT.textContent === el.dataset.t) {
+      tip.style.display = 'none';
+    } else {
+      show();
+    }
+  });
+
+  wrap.appendChild(el);
+});
+
+document.body.addEventListener('click', () => { tip.style.display = 'none'; });
+</script>
+
+</body>
+</html>
