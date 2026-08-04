@@ -1,3 +1,4 @@
+import resumePdf from '@assets/Minh_Nguyen_Resume_2026.pdf'
 import styles from './NavCards.module.scss'
 
 const cards = [
@@ -6,8 +7,9 @@ const cards = [
     label: 'Résumé',
     description: 'Full work history, skills, and education — downloadable PDF.',
     icon: '📄',
-    href: 'https://drive.google.com/file/d/1DQgE_tmyVBtuOw77ozOk5klQY6f7xTDf/view?usp=sharing',
-    external: true,
+    href: resumePdf,
+    download: 'Minh_Nguyen_Resume_2026.pdf',
+    external: false,
     cta: 'Download PDF',
     accent: false,
   },
@@ -41,6 +43,7 @@ export default function NavCards() {
                 className={styles.cardLink}
                 target={card.external ? '_blank' : undefined}
                 rel={card.external ? 'noreferrer' : undefined}
+                download={card.download}
               >
                 {card.cta} →
               </a>

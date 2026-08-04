@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import StatusBadge from '@components/ui/StatusBadge'
 import styles from './Navbar.module.scss'
 
 const links = [
@@ -11,7 +12,10 @@ const links = [
 export default function Navbar() {
   return (
     <nav className={styles.navbar}>
-      <span className={styles.brand}>MN</span>
+      <div className={styles.brandGroup}>
+        <span className={styles.brand}>MN</span>
+        <StatusBadge />
+      </div>
       <ul className={styles.links}>
         {links.map(({ to, label }) => (
           <li key={to}>

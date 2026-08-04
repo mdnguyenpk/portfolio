@@ -13,6 +13,12 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.brandGroup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .brand {
   font-family: var(--font-display);
   font-size: 1.35rem;

@@ -13,4 +13,11 @@ export const projects = [
     tags: ['JavaScript', 'CSS', 'MySQL'],
     link: null,
   },
+  {
+    id: 3,
+    title: 'Bond 007 Pinball Cheat Sheet',
+    description: 'Simple pinball cheat sheet for my favorite game. Used to teach Belles and Chimes players the game.',
+    tags: ['JavaScript', 'CSS', 'HTML'],
+    link: "https://minhtos.dev/bond-pinball-map",
+  },
 ]
