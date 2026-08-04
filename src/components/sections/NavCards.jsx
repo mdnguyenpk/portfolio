@@ -12,16 +12,6 @@ const cards = [
     accent: false,
   },
   {
-    id: 'work',
-    label: 'Experience',
-    description: '10+ years building products at Apple, RealPage, and OnLive.',
-    icon: '💼',
-    href: '/work',
-    external: false,
-    cta: 'View Experience',
-    accent: false,
-  },
-  {
     id: 'sandbox',
     label: 'Sandbox',
     description: 'Experiments, prototypes, and side projects — coming soon.',

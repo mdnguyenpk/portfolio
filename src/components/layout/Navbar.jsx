@@ -3,7 +3,7 @@ import styles from './Navbar.module.scss'
 
 const links = [
   { to: '/', label: 'Home' },
-  { to: '/work', label: 'Work' },
+  { to: '/work', label: 'Projects' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
 ]
