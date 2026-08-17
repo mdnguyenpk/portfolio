@@ -8,15 +8,19 @@ import pfp from '@assets/images/about/pfp.jpg'
 import about1 from '@assets/images/about/about1.webp'
 import about2 from '@assets/images/about/about2.webp'
 import about3 from '@assets/images/about/about3.webp'
-import yoga from '@assets/images/about/yoga.jpg'
+import about4 from '@assets/images/about/about4.webp'
+import about5 from '@assets/images/about/about5.jpg'
+import about6 from '@assets/images/about/about6.webp'
 import styles from './About.module.scss'
 
 const galleryImages = [
-  { src: pfp, alt: `${meta.name} — profile photo` },
-  { src: about1, alt: `${meta.name} — photo 1` },
-  { src: about2, alt: `${meta.name} — photo 2` },
-  { src: about3, alt: `${meta.name} — photo 3` },
-  { src: yoga, alt: `${meta.name} practicing yoga` },
+  { src: pfp, alt: `${meta.name} — Minh in Oracle Pack standing on the field.` },
+  { src: about1, alt: `${meta.name} — 3rd place at a pinball tournament` },
+  { src: about2, alt: `${meta.name} — Snowboarding while staring at the mountain range` },
+  { src: about3, alt: `${meta.name} — Soyjack pose with snow monkeys` },
+  { src: about4, alt: `${meta.name} — Minh holding a giant bok choy leaf` },
+  { src: about5, alt: `${meta.name} — Celebrating 500th Class at YogaSix` },
+  { src: about6, alt: `${meta.name} — Standing in front of a slope at Shiga Kogen` },
 ]
 
 export default function About() {
